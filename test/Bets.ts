@@ -90,3 +90,34 @@ describe("Ownable", () => {
 
   })
 })
+
+describe("Bet", () => {
+  it("Bet should be higher than minimum bet", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0.01")
+
+    await expect(contract.bet(15, {value:bet})).to.be.eventually.ok
+  })
+
+  it("Should revert if bet is lower than minimum", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0")
+
+    await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The bet must be higher or equal than min bet")
+  })
+
+  it("Bet should be lower than maximum bet", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0.01")
+
+    await expect(contract.bet(15, {value:bet})).to.be.eventually.ok
+  })
+
+  it("Should revert if bet is higher than maximum", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0.1")
+
+    await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The bet must be lower or equal than max bet")
+  })
+
+})
