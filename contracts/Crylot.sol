@@ -63,4 +63,8 @@ contract Crylot is Ownable{
     function setPaused(bool pause) public onlyOwner{
         isPaused = pause;
     }
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
 }

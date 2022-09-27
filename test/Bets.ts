@@ -148,4 +148,15 @@ describe("Bet", () => {
     expect(await contract.getTotalBets()).to.be.equal(5)
   })
 
+  it("Should increase balance", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.01")
+
+    for(let i = 0; i<10;i++){
+      await contract.bet(15, {value:bet})
+    }
+
+    expect(await contract.getBalance()).to.be.equal(ethers.utils.parseEther("0.1"))
+  })
 })
