@@ -36,7 +36,7 @@ contract Crylot is Ownable{
     }
 
     function setMaxBet(uint256 _newMaximum) public onlyAdmin returns (uint256) {
-        require(_newMaximum > 0, "The maximum bet must be higher than 0");
+        require(_newMaximum > minBet, "The maximum bet must be higher than the minimum bet");
         maxBet = _newMaximum;
         return maxBet;
     }
