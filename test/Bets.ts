@@ -7,7 +7,7 @@ const getContract = () => loadFixture(deployContract);
 
 describe("Bets", function () {
 
-    describe("MIN bet", () => {
+    describe("Min bet", () => {
       it("Should get MIN bet", async function () {
         const contract = await getContract()
   
@@ -58,12 +58,35 @@ describe("Bets", function () {
         expect(newMaxBet).to.be.equal(actualBet)
       });
 
-      it("Should NOT set MAX bet to 0", async function () {
+      it("Should NOT set MAX bet lower than min bet", async function () {
         const contract = await getContract()
         
         const newMaxBet = ethers.utils.parseEther("0")
 
-        await expect(contract.setMaxBet(newMaxBet)).to.be.revertedWith("The maximum bet must be higher than 0")
+        await expect(contract.setMaxBet(newMaxBet)).to.be.revertedWith("The maximum bet must be higher than the minimum bet")
       });
+      
     })
 });
+
+describe("Ownable", () => {
+  it("Should NOT set MIN bet if is not an admin", async () => {
+    const contract = await getContract()
+
+    const newMin = ethers.utils.parseEther("0.0001")
+    const [_owner, other] = await ethers.getSigners()
+
+    await expect(contract.connect(other).setMinBet(newMin)).to.be.revertedWith("You are not an admin")
+
+  })
+
+  it("Should NOT set MAX bet if is not an admin", async () => {
+    const contract = await getContract()
+
+    const newMaxBet = ethers.utils.parseEther("0.0001")
+    const [_owner, other] = await ethers.getSigners()
+
+    await expect(contract.connect(other).setMaxBet(newMaxBet)).to.be.revertedWith("You are not an admin")
+
+  })
+})
