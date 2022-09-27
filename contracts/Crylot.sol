@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Crylot is Ownable{
 
-    public uint256 minBet = 0.005 ether;
-    public uint256 maxBet = 0.01 ether;
+    uint256 minBet = 0.005 ether;
+    uint256 maxBet = 0.01 ether;
 
     mapping(address => bool) isAdmin;
 
@@ -21,21 +21,21 @@ contract Crylot is Ownable{
     }
 
 
-    public getMinBet() returns (uint256) {
+    function getMinBet() public view  returns (uint256) {
         return minBet;
     }
 
-    public setMinBet(uint256 _newMinimum) returns (uint256) onlyOwner {
+    function setMinBet(uint256 _newMinimum) public onlyOwner returns (uint256) {
         minBet = _newMinimum;
         return minBet;
     }
 
-    public getMaxBet() returns (uint256) {
+    function getMaxBet() public view returns (uint256) {
         return minBet;
     }
 
-    public setMaxBet(uint256 _newMaximum) returns (uint256) onlyOwner {
-        maxbet = _newMaximum;
-        return maxbet;
+    function setMaxBet(uint256 _newMaximum) public onlyOwner returns (uint256) {
+        maxBet = _newMaximum;
+        return maxBet;
     }
 }
