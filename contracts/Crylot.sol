@@ -25,7 +25,7 @@ contract Crylot is Ownable{
         return minBet;
     }
 
-    function setMinBet(uint256 _newMinimum) public onlyOwner returns (uint256) {
+    function setMinBet(uint256 _newMinimum) public onlyAdmin returns (uint256) {
         require(_newMinimum > 0, "The minimum bet must be higher than 0");
         minBet = _newMinimum;
         return minBet;
@@ -35,7 +35,7 @@ contract Crylot is Ownable{
         return maxBet;
     }
 
-    function setMaxBet(uint256 _newMaximum) public onlyOwner returns (uint256) {
+    function setMaxBet(uint256 _newMaximum) public onlyAdmin returns (uint256) {
         require(_newMaximum > 0, "The maximum bet must be higher than 0");
         maxBet = _newMaximum;
         return maxBet;
