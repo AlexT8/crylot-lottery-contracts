@@ -41,7 +41,7 @@ describe("Bets", function () {
       it("Should get MAX bet", async function () {
         const contract = await getContract()
   
-        const bet = ethers.utils.parseEther("0.01")
+        const bet = ethers.utils.parseEther("0.05")
         const maxBet = await contract.getMaxBet()
   
         expect(bet).to.be.equal(maxBet)
@@ -92,6 +92,22 @@ describe("Ownable", () => {
 })
 
 describe("Bet", () => {
+  it("Should bet if is not paused", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0.008")
+
+    await expect(contract.bet(15, {value:bet})).to.be.eventually.ok
+  })
+
+  it("Should NOT bet if IS paused", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0.01")
+
+    await contract.setPaused(true)
+
+    await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The game is paused")
+  })
+
   it("Bet should be higher than minimum bet", async () => {
     const contract = await getContract()
     const bet = ethers.utils.parseEther("0.01")
@@ -118,6 +134,18 @@ describe("Bet", () => {
     const bet = ethers.utils.parseEther("0.1")
 
     await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The bet must be lower or equal than max bet")
+  })
+
+  it("Should count 5 bets", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.01")
+
+    for(let i = 0; i<5;i++){
+      await contract.bet(15, {value:bet})
+    }
+
+    expect(await contract.getTotalBets()).to.be.equal(5)
   })
 
 })
