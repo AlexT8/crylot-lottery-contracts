@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract Crylot is Ownable{
 
     uint256 minBet = 0.005 ether;
@@ -20,6 +19,11 @@ contract Crylot is Ownable{
         _;
     }
 
+    function bet(uint256 number) public payable{
+        require(msg.value >= minBet, "The bet must be higher or equal than min bet");
+        require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
+        uint256 n = number;
+    }
 
     function getMinBet() public view  returns (uint256) {
         return minBet;
