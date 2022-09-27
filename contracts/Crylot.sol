@@ -5,13 +5,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Crylot is Ownable{
 
+    event NumberGuessed(address _addr);
+    event WithdrawnUserFunds(address _addr, uint256 funds);
+
     uint256 minBet = 0.005 ether;
     uint256 maxBet = 0.05 ether;
     uint256 totalBets = 0;
 
+    uint256 randomNumber = 5;
+
     bool isPaused = false;
 
     mapping(address => bool) isAdmin;
+    mapping(address => uint256) userFunds;
 
 
     modifier onlyAdmin() {
@@ -34,6 +40,10 @@ contract Crylot is Ownable{
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
 
+        if(number == randomNumber){
+            userFunds[msg.sender] += ((msg.value / 2) + msg.value);
+            emit NumberGuessed(msg.sender);
+        }
         totalBets += 1;
     }
 
@@ -60,8 +70,24 @@ contract Crylot is Ownable{
         return maxBet;
     }
 
+    function isInPause() public view returns (bool) {
+        return isPaused;
+    }
     function setPaused(bool pause) public onlyOwner{
         isPaused = pause;
+    }
+
+    function getFunds() public view returns (uint256){
+        return userFunds[msg.sender];
+    }
+    function withdrawUserFunds() public payable{
+        uint256 funds = userFunds[msg.sender];
+        require(funds > 0, "You do not have any funds");
+        
+        (bool success,) = (msg.sender).call{value:funds}("");
+        require(success, "Transaction failed");
+
+        emit WithdrawnUserFunds(msg.sender, funds);
     }
 
     function getBalance() public view returns (uint256) {

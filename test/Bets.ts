@@ -91,6 +91,24 @@ describe("Ownable", () => {
   })
 })
 
+describe("Settings", () => {
+  it("Should pause the lottery", async () => {
+    const contract = await getContract()
+
+    await contract.setPaused(true)
+
+    expect(await contract.isInPause()).to.be.true
+  })
+
+  it("Should revert if NOT owner is pausing", async () => {
+    const contract = await getContract()
+    const [_owner, other] = await ethers.getSigners()
+
+
+    await expect(contract.connect(other).setPaused(true)).to.be.revertedWith("Ownable: caller is not the owner")
+  })
+})
+
 describe("Bet", () => {
   it("Should bet if is not paused", async () => {
     const contract = await getContract()
@@ -158,5 +176,51 @@ describe("Bet", () => {
     }
 
     expect(await contract.getBalance()).to.be.equal(ethers.utils.parseEther("0.1"))
+  })
+
+  it("Should increase balance without user funds", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.01")
+
+    await contract.bet(15, {value:bet})
+
+    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0"))
+  })
+
+  it("Should save the user bet + 50%", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await contract.bet(5, {value:bet})
+
+    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0.06"))
+  })
+  
+})
+
+describe("Withdraw", () => {
+  it("Should withdraw user funds", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await contract.bet(4, {value:bet})
+    await contract.bet(5, {value:bet})
+
+    await contract.withdrawUserFunds()
+
+    expect(await contract.getBalance()).to.be.equal(ethers.utils.parseEther("0.02"))
+  })
+
+  it("Should revert if user funds = 0", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await contract.bet(4, {value:bet})
+
+    await expect(contract.withdrawUserFunds()).to.be.rejectedWith("You do not have any funds")
   })
 })
