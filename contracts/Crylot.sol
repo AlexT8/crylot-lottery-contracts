@@ -82,8 +82,9 @@ contract Crylot is Ownable{
     }
     function withdrawUserFunds() public payable{
         uint256 funds = userFunds[msg.sender];
+        require(getBalance() >= funds, "The contract has no liquidity");
         require(funds > 0, "You do not have any funds");
-        
+
         (bool success,) = (msg.sender).call{value:funds}("");
         require(success, "Transaction failed");
 

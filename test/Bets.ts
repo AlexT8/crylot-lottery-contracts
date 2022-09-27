@@ -221,6 +221,16 @@ describe("Withdraw", () => {
 
     await contract.bet(4, {value:bet})
 
-    await expect(contract.withdrawUserFunds()).to.be.rejectedWith("You do not have any funds")
+    await expect(contract.withdrawUserFunds()).to.be.revertedWith("You do not have any funds")
+  })
+
+  it("Should revert if contract has no liquidity", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await contract.bet(5, {value:bet})
+
+    await expect(contract.withdrawUserFunds()).to.be.revertedWith("The contract has no liquidity")
   })
 })
