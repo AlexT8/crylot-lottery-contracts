@@ -5,6 +5,7 @@ export async function deployContract() {
   const Crylot = await ethers.getContractFactory("Crylot");
   const lock = await Crylot.deploy();
 
+  console.log("Contract deployed to: " + lock.address)
   return lock.deployed();
 }
 
