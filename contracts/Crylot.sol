@@ -18,6 +18,7 @@ contract Crylot is Ownable{
 
     mapping(address => bool) isAdmin;
     mapping(address => uint256) userFunds;
+    mapping(address => uint256) userBets;
 
     // -/ SET GAME DIFFICULTIES \-
     // categorie => reward
@@ -50,12 +51,18 @@ contract Crylot is Ownable{
             userFunds[msg.sender] += (msg.value * categories[category]);
             emit NumberGuessed(msg.sender);
         }
+        userBets[msg.sender] += 1;
         totalBets += 1;
     }
 
     function getTotalBets() public view  returns (uint256) {
         return totalBets;
     }
+
+    function getUserBets(address _addr) public view  returns (uint256) {
+        return userBets[_addr];
+    }
+
     function getMinBet() public view  returns (uint256) {
         return minBet;
     }

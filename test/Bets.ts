@@ -166,6 +166,19 @@ describe("Bet", () => {
     expect(await contract.getTotalBets()).to.be.equal(5)
   })
 
+  it("Should increase to 6 user bets", async () => {
+    const contract = await getContract()
+    const bet = ethers.utils.parseEther("0.01")
+
+    const [owner] = await ethers.getSigners()
+
+    for(let i = 0; i<6;i++){
+      await contract.bet(15, 1, {value:bet})
+    }
+
+    expect(await contract.getUserBets(owner.getAddress())).to.be.equal(6)
+  })
+
   it("Should increase balance", async () => {
     const contract = await getContract()
 
