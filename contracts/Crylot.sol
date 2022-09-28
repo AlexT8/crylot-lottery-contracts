@@ -19,6 +19,11 @@ contract Crylot is Ownable{
     mapping(address => bool) isAdmin;
     mapping(address => uint256) userFunds;
 
+    // -/ SET GAME DIFFICULTIES \-
+    // categorie => reward
+    // BRONZE - EMERALD - DIAMOND
+    uint256[3] categories = [7, 35, 70];
+
 
     modifier onlyAdmin() {
         require(
@@ -36,12 +41,13 @@ contract Crylot is Ownable{
         _;
     }
 
-    function bet(uint256 number) public payable canPlay{
+    function bet(uint256 number, uint category) public payable canPlay{
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
+        require(category <= maxBet, "The bet must be lower or equal than max bet");
 
         if(number == randomNumber){
-            userFunds[msg.sender] += ((msg.value / 2) + msg.value);
+            userFunds[msg.sender] += (msg.value * categories[category]);
             emit NumberGuessed(msg.sender);
         }
         totalBets += 1;

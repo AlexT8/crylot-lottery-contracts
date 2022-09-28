@@ -114,7 +114,7 @@ describe("Bet", () => {
     const contract = await getContract()
     const bet = ethers.utils.parseEther("0.008")
 
-    await expect(contract.bet(15, {value:bet})).to.be.eventually.ok
+    await expect(contract.bet(15, 1, {value:bet})).to.be.eventually.ok
   })
 
   it("Should NOT bet if IS paused", async () => {
@@ -123,35 +123,35 @@ describe("Bet", () => {
 
     await contract.setPaused(true)
 
-    await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The game is paused")
+    await expect(contract.bet(15, 1, {value:bet})).to.be.revertedWith("The game is paused")
   })
 
   it("Bet should be higher than minimum bet", async () => {
     const contract = await getContract()
     const bet = ethers.utils.parseEther("0.01")
 
-    await expect(contract.bet(15, {value:bet})).to.be.eventually.ok
+    await expect(contract.bet(15, 1, {value:bet})).to.be.eventually.ok
   })
 
   it("Should revert if bet is lower than minimum", async () => {
     const contract = await getContract()
     const bet = ethers.utils.parseEther("0")
 
-    await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The bet must be higher or equal than min bet")
+    await expect(contract.bet(15, 1, {value:bet})).to.be.revertedWith("The bet must be higher or equal than min bet")
   })
 
   it("Bet should be lower than maximum bet", async () => {
     const contract = await getContract()
     const bet = ethers.utils.parseEther("0.01")
 
-    await expect(contract.bet(15, {value:bet})).to.be.eventually.ok
+    await expect(contract.bet(15, 1, {value:bet})).to.be.eventually.ok
   })
 
   it("Should revert if bet is higher than maximum", async () => {
     const contract = await getContract()
     const bet = ethers.utils.parseEther("0.1")
 
-    await expect(contract.bet(15, {value:bet})).to.be.revertedWith("The bet must be lower or equal than max bet")
+    await expect(contract.bet(15, 1, {value:bet})).to.be.revertedWith("The bet must be lower or equal than max bet")
   })
 
   it("Should count 5 bets", async () => {
@@ -160,7 +160,7 @@ describe("Bet", () => {
     const bet = ethers.utils.parseEther("0.01")
 
     for(let i = 0; i<5;i++){
-      await contract.bet(15, {value:bet})
+      await contract.bet(15, 1, {value:bet})
     }
 
     expect(await contract.getTotalBets()).to.be.equal(5)
@@ -172,7 +172,7 @@ describe("Bet", () => {
     const bet = ethers.utils.parseEther("0.01")
 
     for(let i = 0; i<10;i++){
-      await contract.bet(15, {value:bet})
+      await contract.bet(15, 1, {value:bet})
     }
 
     expect(await contract.getBalance()).to.be.equal(ethers.utils.parseEther("0.1"))
@@ -183,19 +183,39 @@ describe("Bet", () => {
 
     const bet = ethers.utils.parseEther("0.01")
 
-    await contract.bet(15, {value:bet})
+    await contract.bet(15, 1, {value:bet})
 
     expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0"))
   })
 
-  it("Should save the user bet + 50%", async () => {
+  it("Should save the user bet + 7x", async () => {
     const contract = await getContract()
 
     const bet = ethers.utils.parseEther("0.04")
 
-    await contract.bet(5, {value:bet})
+    await contract.bet(5, 0, {value:bet})
 
-    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0.06"))
+    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0.28"))
+  })
+
+  it("Should save the user bet + 35x", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await contract.bet(5, 1, {value:bet})
+
+    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("1.4"))
+  })
+
+  it("Should save the user bet + 70x", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await contract.bet(5, 2, {value:bet})
+
+    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("2.8"))
   })
   
 })
@@ -206,12 +226,15 @@ describe("Withdraw", () => {
 
     const bet = ethers.utils.parseEther("0.04")
 
-    await contract.bet(4, {value:bet})
-    await contract.bet(5, {value:bet})
+    for(let i = 0; i < 40; i++){
+      await contract.bet(1, 1, {value:bet})
+    }
+
+    await contract.bet(5, 1, {value:bet})
 
     await contract.withdrawUserFunds()
 
-    expect(await contract.getBalance()).to.be.equal(ethers.utils.parseEther("0.02"))
+    expect(await contract.getBalance()).to.be.equal(ethers.utils.parseEther("0.24"))
   })
 
   it("Should revert if user funds = 0", async () => {
@@ -219,7 +242,7 @@ describe("Withdraw", () => {
 
     const bet = ethers.utils.parseEther("0.04")
 
-    await contract.bet(4, {value:bet})
+    await contract.bet(4, 1, {value:bet})
 
     await expect(contract.withdrawUserFunds()).to.be.revertedWith("You do not have any funds")
   })
@@ -229,7 +252,7 @@ describe("Withdraw", () => {
 
     const bet = ethers.utils.parseEther("0.04")
 
-    await contract.bet(5, {value:bet})
+    await contract.bet(5, 1, {value:bet})
 
     await expect(contract.withdrawUserFunds()).to.be.revertedWith("The contract has no liquidity")
   })
