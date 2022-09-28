@@ -1,13 +1,3 @@
-# Sample Hardhat Project
+# Repo where the magic occurs!
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+This repo has the contracts which interact with Chainlink VRF (Verifiable Random Function) that creates a random number and the contract parse the digits for user preference.
