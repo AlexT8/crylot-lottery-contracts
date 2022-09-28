@@ -217,6 +217,14 @@ describe("Bet", () => {
 
     expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("2.8"))
   })
+
+  it("Should revert if bet is out of categorie", async () => {
+    const contract = await getContract()
+
+    const bet = ethers.utils.parseEther("0.04")
+
+    await expect(contract.bet(5, 3, {value:bet})).to.be.revertedWith("The categorie must be lower than 3")
+  })
   
 })
 
