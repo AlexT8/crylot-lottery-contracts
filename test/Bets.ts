@@ -188,7 +188,7 @@ describe("Bet", () => {
     expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0"))
   })
 
-  it("Should save the user bet + 7x", async () => {
+  it("Should save 7x user bet", async () => {
     const contract = await getContract()
 
     const bet = ethers.utils.parseEther("0.04")
@@ -198,7 +198,7 @@ describe("Bet", () => {
     expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0.28"))
   })
 
-  it("Should save the user bet + 35x", async () => {
+  it("Should save 35x user bet", async () => {
     const contract = await getContract()
 
     const bet = ethers.utils.parseEther("0.04")
@@ -208,7 +208,7 @@ describe("Bet", () => {
     expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("1.4"))
   })
 
-  it("Should save the user bet + 70x", async () => {
+  it("Should save 70x user bet", async () => {
     const contract = await getContract()
 
     const bet = ethers.utils.parseEther("0.04")
