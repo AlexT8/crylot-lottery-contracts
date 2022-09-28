@@ -42,9 +42,9 @@ contract Crylot is Ownable{
     }
 
     function bet(uint256 number, uint category) public payable canPlay{
+        require(category < 3 , "The categorie must be lower than 3");
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
-        require(category < 3 , "The categorie must be lower than 3");
 
         if(number == randomNumber){
             userFunds[msg.sender] += (msg.value * categories[category]);
