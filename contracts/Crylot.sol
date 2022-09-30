@@ -109,8 +109,8 @@ contract Crylot is Ownable{
         isPaused = pause;
     }
 
-    function getFunds() public view returns (uint256){
-        return userFunds[msg.sender];
+    function getFunds(address _addr) public view returns (uint256){
+        return userFunds[_addr];
     }
     function withdrawUserFunds() public payable noReentrancy{
         uint256 funds = userFunds[msg.sender];

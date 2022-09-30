@@ -218,42 +218,46 @@ describe("Bet", () => {
 
   it("Should increase balance without user funds", async () => {
     const contract = await getContract()
+    const [owner] = await ethers.getSigners()
 
     const bet = ethers.utils.parseEther("0.01")
 
     await contract.bet(15, 1, {value:bet})
 
-    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0"))
+    expect(await contract.getFunds(await owner.getAddress())).to.be.equal(ethers.utils.parseEther("0"))
   })
 
   it("Should save 7x user bet", async () => {
     const contract = await getContract()
+    const [owner] = await ethers.getSigners()
 
     const bet = ethers.utils.parseEther("0.04")
 
     await contract.bet(5, 0, {value:bet})
 
-    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("0.28"))
+    expect(await contract.getFunds(await owner.getAddress())).to.be.equal(ethers.utils.parseEther("0.28"))
   })
 
   it("Should save 35x user bet", async () => {
     const contract = await getContract()
+    const [owner] = await ethers.getSigners()
 
     const bet = ethers.utils.parseEther("0.04")
 
     await contract.bet(5, 1, {value:bet})
 
-    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("1.4"))
+    expect(await contract.getFunds(await owner.getAddress())).to.be.equal(ethers.utils.parseEther("1.4"))
   })
 
   it("Should save 70x user bet", async () => {
     const contract = await getContract()
+    const [owner] = await ethers.getSigners()
 
     const bet = ethers.utils.parseEther("0.04")
 
     await contract.bet(5, 2, {value:bet})
 
-    expect(await contract.getFunds()).to.be.equal(ethers.utils.parseEther("2.8"))
+    expect(await contract.getFunds(await owner.getAddress())).to.be.equal(ethers.utils.parseEther("2.8"))
   })
 
   it("Should revert if bet is out of categorie", async () => {
