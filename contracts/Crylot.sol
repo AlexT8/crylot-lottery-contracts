@@ -20,6 +20,12 @@ contract Crylot is Ownable{
     mapping(address => uint256) userFunds;
     mapping(address => uint256) userBets;
 
+    struct BET {
+        address _addr;
+        uint256 amount;
+        uint256 number;
+    }
+    BET lastBet;
     // -/ SET GAME DIFFICULTIES \-
     // categorie => reward
     // BRONZE - EMERALD - DIAMOND
@@ -42,6 +48,18 @@ contract Crylot is Ownable{
         _;
     }
 
+    bool internal locked;
+    modifier noReentrancy() {
+        require(!locked, "No re-entrancy!");
+        locked = true;
+        _;
+        locked = false;
+    }
+
+    function getLastBet() public view returns(BET memory){
+        return lastBet;
+    }
+
     function bet(uint256 number, uint category) public payable canPlay{
         require(category < 3 , "The categorie must be lower than 3");
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
@@ -51,6 +69,7 @@ contract Crylot is Ownable{
             userFunds[msg.sender] += (msg.value * categories[category]);
             emit NumberGuessed(msg.sender);
         }
+        lastBet = BET(msg.sender, msg.value, number);
         userBets[msg.sender] += 1;
         totalBets += 1;
     }
@@ -93,7 +112,7 @@ contract Crylot is Ownable{
     function getFunds() public view returns (uint256){
         return userFunds[msg.sender];
     }
-    function withdrawUserFunds() public payable{
+    function withdrawUserFunds() public payable noReentrancy{
         uint256 funds = userFunds[msg.sender];
         require(getBalance() >= funds, "The contract has no liquidity");
         require(funds > 0, "You do not have any funds");

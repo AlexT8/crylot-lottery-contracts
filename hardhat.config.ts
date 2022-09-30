@@ -9,9 +9,6 @@ const config: HardhatUserConfig = {
   networks: {
     development: {
       url: "http://127.0.0.1:7545",     // Localhost (default: none)
-      // @ts-ignore
-      port: 7545,            // Standard Ethereum port (default: none)
-      network_id: "*"        // Any network (default: none)
     },
     goerli: {
     url: `https://goerli.infura.io/v3/${process.env.INFURA_APIKEY}`, //Infura url with projectId
