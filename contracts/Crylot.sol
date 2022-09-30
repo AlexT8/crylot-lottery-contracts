@@ -48,6 +48,14 @@ contract Crylot is Ownable{
         _;
     }
 
+    bool internal locked;
+    modifier noReentrancy() {
+        require(!locked, "No re-entrancy!");
+        locked = true;
+        _;
+        locked = false;
+    }
+
     function getLastBet() public view returns(BET memory){
         return lastBet;
     }
@@ -104,7 +112,7 @@ contract Crylot is Ownable{
     function getFunds() public view returns (uint256){
         return userFunds[msg.sender];
     }
-    function withdrawUserFunds() public payable{
+    function withdrawUserFunds() public payable noReentrancy{
         uint256 funds = userFunds[msg.sender];
         require(getBalance() >= funds, "The contract has no liquidity");
         require(funds > 0, "You do not have any funds");
