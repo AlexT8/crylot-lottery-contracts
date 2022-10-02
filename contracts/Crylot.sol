@@ -120,10 +120,18 @@ contract Crylot is Ownable{
         (bool success,) = (msg.sender).call{value:funds}("");
         require(success, "Transaction failed");
 
+        userFunds[msg.sender] = 0;
         emit WithdrawnUserFunds(msg.sender, funds);
     }
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function withdraw(address _addr) public payable onlyAdmin{
+        uint256 balance = getBalance();
+        require(balance > 0, "The balance is 0");
+        (bool success,) = (_addr).call{value:balance}("");
+        require(success, "Transaction failed");
     }
 }

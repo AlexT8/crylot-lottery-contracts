@@ -306,4 +306,26 @@ describe("Withdraw", () => {
 
     await expect(contract.withdrawUserFunds()).to.be.revertedWith("The contract has no liquidity")
   })
+
+  it("Should withdraw balance", async () => {
+    const contract = await getContract()
+
+    const [owner] = await ethers.getSigners()
+
+    const bet = ethers.utils.parseEther("0.04")
+    await contract.bet(5, 1, {value:bet})
+    await contract.withdraw(owner.getAddress())
+
+    expect(await contract.getBalance()).to.be.equal(0)
+  })
+
+  it("Should NOT withdraw if balance is 0", async () => {
+    const contract = await getContract()
+
+    const [owner] = await ethers.getSigners()
+    const address = await owner.getAddress()
+    
+
+    await expect(contract.withdraw(address)).to.be.revertedWith("The balance is 0")
+  })
 })
