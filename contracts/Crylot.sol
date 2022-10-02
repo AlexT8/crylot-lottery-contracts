@@ -5,8 +5,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Crylot is Ownable{
 
-    event NumberGuessed(address _addr);
+    event BetDone();
+    event NumberGuessed(address _addr, bool guessed, uint256 number, uint256 randomNumber);
     event WithdrawnUserFunds(address _addr, uint256 funds);
+    event WithdrawnBalance(address _addr, uint256 quantity);
 
     uint256 minBet = 0.005 ether;
     uint256 maxBet = 0.05 ether;
@@ -65,13 +67,14 @@ contract Crylot is Ownable{
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
 
-        if(number == randomNumber){
-            userFunds[msg.sender] += (msg.value * categories[category]);
-            emit NumberGuessed(msg.sender);
-        }
         lastBet = BET(msg.sender, msg.value, number);
         userBets[msg.sender] += 1;
         totalBets += 1;
+        if(number == randomNumber){
+            userFunds[msg.sender] += (msg.value * categories[category]);
+        }
+        emit NumberGuessed(msg.sender, number == randomNumber, number, randomNumber);
+        emit BetDone();
     }
 
     function getTotalBets() public view  returns (uint256) {
@@ -109,8 +112,8 @@ contract Crylot is Ownable{
         isPaused = pause;
     }
 
-    function getFunds() public view returns (uint256){
-        return userFunds[msg.sender];
+    function getFunds(address _addr) public view returns (uint256){
+        return userFunds[_addr];
     }
     function withdrawUserFunds() public payable noReentrancy{
         uint256 funds = userFunds[msg.sender];
@@ -120,10 +123,19 @@ contract Crylot is Ownable{
         (bool success,) = (msg.sender).call{value:funds}("");
         require(success, "Transaction failed");
 
+        userFunds[msg.sender] = 0;
         emit WithdrawnUserFunds(msg.sender, funds);
     }
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function withdraw(address _addr) public payable onlyAdmin{
+        uint256 balance = getBalance();
+        require(balance > 0, "The balance is 0");
+        (bool success,) = (_addr).call{value:balance}("");
+        require(success, "Transaction failed");
+        emit WithdrawnBalance(msg.sender, balance);
     }
 }
