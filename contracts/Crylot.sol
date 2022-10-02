@@ -72,10 +72,8 @@ contract Crylot is Ownable{
         totalBets += 1;
         if(number == randomNumber){
             userFunds[msg.sender] += (msg.value * categories[category]);
-            emit NumberGuessed(msg.sender, true, number, randomNumber);
-        }else{
-            emit NumberGuessed(msg.sender, false, number, randomNumber);
         }
+        emit NumberGuessed(msg.sender, number == randomNumber, number, randomNumber);
         emit BetDone();
     }
 
