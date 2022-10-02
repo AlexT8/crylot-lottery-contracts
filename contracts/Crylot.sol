@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Crylot is Ownable{
 
-    event NumberGuessed(address _addr);
+    event BetDone(address _addr, bool guessed);
     event WithdrawnUserFunds(address _addr, uint256 funds);
+    event WithdrawnBalance(address _addr, uint256 quantity);
 
     uint256 minBet = 0.005 ether;
     uint256 maxBet = 0.05 ether;
@@ -65,13 +66,13 @@ contract Crylot is Ownable{
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
 
-        if(number == randomNumber){
-            userFunds[msg.sender] += (msg.value * categories[category]);
-            emit NumberGuessed(msg.sender);
-        }
         lastBet = BET(msg.sender, msg.value, number);
         userBets[msg.sender] += 1;
         totalBets += 1;
+        if(number == randomNumber){
+            userFunds[msg.sender] += (msg.value * categories[category]);
+        }
+        emit BetDone(msg.sender, number == randomNumber);
     }
 
     function getTotalBets() public view  returns (uint256) {
@@ -133,5 +134,6 @@ contract Crylot is Ownable{
         require(balance > 0, "The balance is 0");
         (bool success,) = (_addr).call{value:balance}("");
         require(success, "Transaction failed");
+        emit WithdrawnBalance(msg.sender, balance);
     }
 }
