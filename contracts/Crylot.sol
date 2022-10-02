@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Crylot is Ownable{
 
-    event BetDone(address _addr, bool guessed);
+    event BetDone();
+    event NumberGuessed(address _addr, bool guessed, uint256 number, uint256 randomNumber);
     event WithdrawnUserFunds(address _addr, uint256 funds);
     event WithdrawnBalance(address _addr, uint256 quantity);
 
@@ -71,8 +72,11 @@ contract Crylot is Ownable{
         totalBets += 1;
         if(number == randomNumber){
             userFunds[msg.sender] += (msg.value * categories[category]);
+            emit NumberGuessed(msg.sender, true, number, randomNumber);
+        }else{
+            emit NumberGuessed(msg.sender, false, number, randomNumber);
         }
-        emit BetDone(msg.sender, number == randomNumber);
+        emit BetDone();
     }
 
     function getTotalBets() public view  returns (uint256) {
