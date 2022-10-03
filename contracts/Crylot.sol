@@ -57,16 +57,14 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
     event WithdrawnBalance(address _addr, uint256 quantity);
 
     uint256 minBet = 0.005 ether;
-    uint256 maxBet = 0.05 ether;
+    uint256 maxBet = 0.1 ether;
     uint256 totalBets = 0;
 
     bool isPaused = false;
 
-    mapping(address => bool) isAdmin;
     mapping(address => uint256) userFunds;
     mapping(address => uint256) userBets;
 
-    Bet lastBet;
     // -/ SET GAME DIFFICULTIES \-
     // categorie => reward
     // BRONZE - EMERALD - DIAMOND
@@ -76,7 +74,7 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
 
     modifier onlyAdmin() {
         require(
-            isAdmin[msg.sender] || msg.sender == owner(),
+            msg.sender == owner(),
             "You are not an admin"
         );
         _;
@@ -96,10 +94,6 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
         locked = true;
         _;
         locked = false;
-    }
-
-    function getLastBet() public view returns(Bet memory){
-        return lastBet;
     }
 
     function bet(uint256 number, uint256 category) external payable canPlay returns(uint256 betId){
@@ -122,9 +116,6 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
         return betId;
     }
 
-    function getBet(uint256 betId) public view returns(Bet memory){
-        return bets[betId];
-    }
 
     function getTotalBets() public view  returns (uint256) {
         return totalBets;
@@ -164,9 +155,10 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
     function getFunds(address _addr) public view returns (uint256){
         return userFunds[_addr];
     }
+
     function withdrawUserFunds() public payable noReentrancy{
         uint256 funds = userFunds[msg.sender];
-        require(getBalance() >= funds, "The contract has no liquidity");
+        require(getBalance() > funds, "The contract has no liquidity");
         require(funds > 0, "You do not have any funds");
 
         (bool success,) = (msg.sender).call{value:funds}("");

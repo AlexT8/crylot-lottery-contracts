@@ -41,7 +41,7 @@ describe("Bets", function () {
       it("Should get MAX bet", async function () {
         const contract = await getContract()
   
-        const bet = ethers.utils.parseEther("0.05")
+        const bet = ethers.utils.parseEther("0.1")
         const maxBet = await contract.getMaxBet()
   
         expect(bet).to.be.equal(maxBet)
@@ -50,7 +50,7 @@ describe("Bets", function () {
       it("Should set MAX bet", async function () {
         const contract = await getContract()
         
-        const newMaxBet = ethers.utils.parseEther("0.1")
+        const newMaxBet = ethers.utils.parseEther("0.5")
         await contract.setMaxBet(newMaxBet)
 
         const actualBet = await contract.getMaxBet()
@@ -107,31 +107,6 @@ describe("Settings", () => {
     await expect(contract.connect(other).setPaused(true)).to.be.revertedWith("Ownable: caller is not the owner")
   })
 
-  it("Should return 0 if there is no last bet", async () => {
-    const contract = await getContract()
-    const [_addr, amount, number] = await contract.getLastBet()
-    
-    const zeroAddress = ethers.constants.AddressZero
-    const zeroEthers = ethers.utils.parseEther("0")
-
-    expect(_addr).to.be.equal(zeroAddress)
-    expect(amount).to.be.equal(zeroEthers)
-    expect(number).to.be.equal(zeroEthers)
-  })
-
-  it("Should return last bet", async () => {
-    const contract = await getContract()
-    const bet = ethers.utils.parseEther("0.015")
-    await contract.bet(15, 1, {value:bet})
-
-    const [_addr, amount, number] = await contract.getLastBet()
-    
-    const [owner] = await ethers.getSigners()
-
-    expect(_addr).to.be.equal(await owner.getAddress())
-    expect(amount).to.be.equal(bet)
-    expect(number).to.be.equal(15)
-  })
 })
 
 describe("Bet", () => {
