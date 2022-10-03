@@ -1,12 +1,58 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
+import '@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol';
+import '@chainlink/contracts/src/v0.8/ConfirmedOwner.sol';
 
-contract Crylot is Ownable{
+contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
 
+    // ---------- CHAINLINK CRF SETTINGS ---------- 
+    VRFCoordinatorV2Interface COORDINATOR;
+    bytes32 keyHash;
+    uint32 callbackGasLimit = 100000;
+    uint16 requestConfirmations = 4;
+    uint32 numWords = 1;
+    uint64 s_subscriptionId;
+
+    constructor(bytes32 _keyHash, address _vrfConsumer, uint64 subscriptionId)
+    VRFConsumerBaseV2(_vrfConsumer)
+    ConfirmedOwner(msg.sender)
+    {
+        COORDINATOR = VRFCoordinatorV2Interface(_vrfConsumer);
+        s_subscriptionId = subscriptionId;
+        keyHash = _keyHash;
+    }
+
+    struct Bet {
+        uint256[] vrfNumber;
+        bool exists; // whether a requestId exists
+        bool fulfilled; // whether the request has been successfully fulfilled
+        address _addr;
+        uint256 amount;
+        uint256 number;
+        uint256 category;
+    }
+    mapping(uint256 => Bet) public bets; /* requestId --> requestStatus */
+
+    function fulfillRandomWords(uint256 _betId, uint256[] memory _randomWords) internal override {
+        require(bets[_betId].exists, 'Bet not found');
+        bets[_betId].fulfilled = true;
+        bets[_betId].vrfNumber = _randomWords;
+
+        //BET SETTINGS
+        Bet memory req = bets[_betId];
+        uint256 randomNumber = _randomWords[0] % range[req.category];
+        if(req.number == randomNumber){
+            userFunds[req._addr] += (req.amount * categories[req.category]);
+        }
+        emit NumberGuessed(req._addr, req.number == randomNumber, req.number, randomNumber);
+        emit BetDone();
+    }
+
+    // ----------  BET SETTINGS ---------- 
     event BetDone();
-    event NumberGuessed(address _addr, bool guessed, uint256 number, uint256 randomNumber);
+    event NumberGuessed(address _addr, bool guessed, uint256 number, uint256 winningNumber);
     event WithdrawnUserFunds(address _addr, uint256 funds);
     event WithdrawnBalance(address _addr, uint256 quantity);
 
@@ -14,29 +60,23 @@ contract Crylot is Ownable{
     uint256 maxBet = 0.05 ether;
     uint256 totalBets = 0;
 
-    uint256 randomNumber = 5;
-
     bool isPaused = false;
 
     mapping(address => bool) isAdmin;
     mapping(address => uint256) userFunds;
     mapping(address => uint256) userBets;
 
-    struct BET {
-        address _addr;
-        uint256 amount;
-        uint256 number;
-    }
-    BET lastBet;
+    Bet lastBet;
     // -/ SET GAME DIFFICULTIES \-
     // categorie => reward
     // BRONZE - EMERALD - DIAMOND
     uint256[3] categories = [7, 35, 70];
+    uint256[3] range = [10, 50, 100];
 
 
     modifier onlyAdmin() {
         require(
-            isAdmin[_msgSender()] || _msgSender() == owner(),
+            isAdmin[msg.sender] || msg.sender == owner(),
             "You are not an admin"
         );
         _;
@@ -58,23 +98,32 @@ contract Crylot is Ownable{
         locked = false;
     }
 
-    function getLastBet() public view returns(BET memory){
+    function getLastBet() public view returns(Bet memory){
         return lastBet;
     }
 
-    function bet(uint256 number, uint category) public payable canPlay{
+    function bet(uint256 number, uint256 category) external payable canPlay returns(uint256 betId){
         require(category < 3 , "The categorie must be lower than 3");
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
 
-        lastBet = BET(msg.sender, msg.value, number);
+        betId = COORDINATOR.requestRandomWords(
+            keyHash,
+            s_subscriptionId,
+            requestConfirmations,
+            callbackGasLimit,
+            numWords
+        );
+        bets[betId] = Bet(new uint256[](0), true, false, msg.sender, msg.value, number, category);
+
         userBets[msg.sender] += 1;
         totalBets += 1;
-        if(number == randomNumber){
-            userFunds[msg.sender] += (msg.value * categories[category]);
-        }
-        emit NumberGuessed(msg.sender, number == randomNumber, number, randomNumber);
-        emit BetDone();
+
+        return betId;
+    }
+
+    function getBet(uint256 betId) public view returns(Bet memory){
+        return bets[betId];
     }
 
     function getTotalBets() public view  returns (uint256) {
