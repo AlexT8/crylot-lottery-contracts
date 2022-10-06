@@ -11,7 +11,7 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:7545",     // Localhost (default: none)
     },
     goerli: {
-    url: `https://goerli.infura.io/v3/${process.env.INFURA_APIKEY}`, //Infura url with projectId
+    url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`,
       accounts: [process.env.SIGNER_PRIVATE_KEY || ''] // add the account that will deploy the contract (private key)
     }
   }
