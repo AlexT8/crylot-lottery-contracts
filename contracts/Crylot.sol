@@ -11,7 +11,7 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
     VRFCoordinatorV2Interface COORDINATOR;
     bytes32 keyHash;
     uint32 callbackGasLimit = 100000;
-    uint16 requestConfirmations = 4;
+    uint16 requestConfirmations = 3;
     uint32 numWords = 1;
     uint64 s_subscriptionId;
 
@@ -26,7 +26,6 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
 
     struct Bet {
         uint256[] vrfNumber;
-        bool exists; // whether a requestId exists
         bool fulfilled; // whether the request has been successfully fulfilled
         address _addr;
         uint256 amount;
@@ -36,7 +35,6 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
     mapping(uint256 => Bet) public bets; /* requestId --> requestStatus */
 
     function fulfillRandomWords(uint256 _betId, uint256[] memory _randomWords) internal override {
-        require(bets[_betId].exists, 'Bet not found');
         bets[_betId].fulfilled = true;
         bets[_betId].vrfNumber = _randomWords;
 
@@ -108,7 +106,7 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
             callbackGasLimit,
             numWords
         );
-        bets[betId] = Bet(new uint256[](0), true, false, msg.sender, msg.value, number, category);
+        bets[betId] = Bet(new uint256[](0), false, msg.sender, msg.value, number, category);
 
         userBets[msg.sender] += 1;
         totalBets += 1;
